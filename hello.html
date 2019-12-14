@@ -39,16 +39,16 @@
             }
         };
     }();
-
+    
     async function ansButtonClicked(clickedNum){ // 回答ボタンがクリックされたときに, 正解・不正解を表示
         await google.script.run.withSuccessHandler(dispCorrectOrMiss).withFailureHandler(failedAccess).withUserObject(countObj.count, 'answerButtonClick').answerButtonClick(clickedNum, countObj.count)
-        await document.getElementById("next").addEventListener("onclick", proceedNext);
+        document.getElementById("next").addEventListener("onclick", dream);
     }
 
-    async function proceedNext(){
+    async function dream() {
         countObj.countPlus();
         try {
-            await google.script.run.withSuccessHandler(returnQInfo).withFailureHandler(failedAccess).withUserObject(countObj.count, 'QAInfo').QAInfo(countObj.count);
+            await google.script.run.withSuccessHandler(returnQInfo).withFailureHandler(failedAccess).withUserObject(countObj.count, 'QAInfo').QAInfo(countObj.count);;
         } catch (e) {
             document.getElementById("Button4").insertAdjacentHTML('afterend','<p>error → hello.html → 問題文など取得時 → ' + e.message + '</p>');
         }
@@ -81,7 +81,7 @@
         do {
             // document.getElementById("Button4").insertAdjacentHTML('afterend','<p>1であれば問題なし = ' + closer(0) + '</p>');
             // ++count;
-            proceedNext();
+            dream();
         } while (count == 10);
     } catch (k) {
         document.getElementById("Button4").insertAdjacentHTML('afterend','<p>error → hello.html → do while文中→ ' + k.message + '</p>');
