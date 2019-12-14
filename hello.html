@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <base target="_top">
+    <script src="https://code.jquery.com/jquery-3.1.1.js"></script>
+</head>
+<body>
+    <p id="qNum">おはよう</p>
+    <p id='qSentence'>こんにちは</p> <!-- 問題文を取得 -->
+    <ol>
+    <li id='q1'></li> <!-- 選択肢1を表示 -->
+    <li id='q2'></li>
+    <li id='q3'></li>
+    <li id='q4'></li>
+    </ol>
+
+    <input type="button" id="Button1" value="1" onclick="google.script.run.withSuccessHandler(dispCorrectOrMiss).withFailureHandler(failedAccess).withUserObject(countObj.count, 'answerButtonClick').answerButtonClick(this.value, countObj.count)">
+    <input type="button" id="Button2" value="2" onclick="google.script.run.withSuccessHandler(dispCorrectOrMiss).withFailureHandler(failedAccess).withUserObject(countObj.count, 'answerButtonClick').answerButtonClick(this.value, countObj.count)">
+    <input type="button" id="Button3" value="3" onclick="google.script.run.withSuccessHandler(dispCorrectOrMiss).withFailureHandler(failedAccess).withUserObject(countObj.count, 'answerButtonClick').answerButtonClick(this.value, countObj.count)">
+    <input type="button" id="Button4" value="4" onclick="google.script.run.withSuccessHandler(dispCorrectOrMiss).withFailureHandler(failedAccess).withUserObject(countObj.count, 'answerButtonClick').answerButtonClick(this.value, countObj.count)">
+
+    <p id='CorrectOrMiss'><p>
+    <input type="button" id="next" value="次に進む">
+
+    <script>
+//            $("#qNum").html('JQueryは健全動作中!');
+        <? Logger.log('bodyタグ内のscriptタグ内'); ?>
+        try {
+//            document.getElementById("next").removeEventListener("onclick", closer);
+        
+            var equal = 0;
+            var countObj = {
+                count: 1,
+                countPlus: () => ++this.count
+            
+            };
+            
+            var closer = function(){
+                let b = 0;
+                return function(plusOr){
+                    if (plusOr == 1){
+                        return ++equal;
+                    }else{
+                        return b;
+                    }
+                    
+                };
+            }();
+            
+            function nextTurn(x){
+                try {
+                    google.script.run.withSuccessHandler(returnQInfo).withFailureHandler(failedAccess).withUserObject(countObj.count), 'QAInfo').QAInfo(countObj.count);
+                } catch(e) {
+                    document.getElementById("Button4").insertAdjacentHTML('afterend', '<p>error -> hello.html -> QAInfo呼び出し -> ' + e.message + '</p>');
+                }
+            }
+            
+            nextTurn(0);
+            
+            
+            
+            async function proceedNext(){
+                closer(1);
+                    try {
+                        let h = await google.script.run.withSuccessHandler(returnQInfo).withFailureHandler(failedAccess).withUserObject(countObj.count, 'QAInfo').QAInfo(countObj.count);
+                    } catch (e) {
+                        document.getElementById("Button4").insertAdjacentHTML('afterend','<p>error → hello.html → GASスクリプト関数呼び出し → ' + e.message + '</p>');
+                    }
+            }
+            
+            function returnQInfo(data, d){
+//                document.getElementById("Button4").insertAdjacentHTML('afterend','<p>returnQInfoは実引数の受け取りに成功した : ' + data[0][0] + '</p>');
+            
+                $("#qNum").html('問題' + d);
+                $("#qSentence").html(data[0][0]);
+                for (var j=1; j<=4; ++j){
+                    $("#q" + j).html(data[0][j]);
+                }
+            }
+            
+            function dispCorrectOrMiss(CorrectOrMiss){
+                if (CorrectOrMiss == 1){
+                    $("#CorrectOrMiss").html('正解');
+                } else {
+                    $("#CorrectOrMiss").html('不正解');
+                }
+                document.getElementById("a").addEventListener("onclick", nextTurn);
+            }
+            
+            function failedAccess(numQ, functionName){
+                document.getElementById("Button4").insertAdjacentHTML('afterend','<p>missed to call' + functionName +  numQ + '</p>');
+            }
+            
+            try {
+                  let c = 1;
+//                do {
+//                    document.getElementById("Button4").insertAdjacentHTML('afterend','<p>1であれば問題なし = ' + closer(0) + '</p>');
+//                    proceedNext()
+                    
+//                } while (closer(0) == 10);
+            } catch (k) {
+                document.getElementById("Button4").insertAdjacentHTML('afterend','<p>error → hello.html → do while文中→ ' + k.message + '</p>');
+            }
+        } catch(b) {
+            document.getElementById("Button4").insertAdjacentHTML('afterend','<p>error → hello.html → bodyタグ内のscriptタグ内→ ' + b.message + '</p>');
+        }
+    </script>
+</body>
+</html>
