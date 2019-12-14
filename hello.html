@@ -31,7 +31,7 @@
             var equal = 0;
             var countObj = {
                 count: 1,
-                countPlus: () => ++this.count
+                countPlus: () => {++this.count}
             
             };
             
@@ -47,7 +47,10 @@
                 };
             }();
             
-            function nextTurn(){
+            function nextTurn(x){
+                if (x = 1){
+                    countObj.countPlus();
+                }
                 try {
                     google.script.run.withSuccessHandler(returnQInfo).withFailureHandler(failedAccess).withUserObject(countObj.count, 'QAInfo').QAInfo(countObj.count);
                 } catch(e) {
@@ -55,7 +58,7 @@
                 }
             }
             
-            nextTurn();
+            nextTurn(0);
             
             
             
@@ -84,7 +87,7 @@
                 } else {
                     $("#CorrectOrMiss").html('不正解');
                 }
-                document.getElementById("a").addEventListener("onclick", nextTurn);
+                document.getElementById("next").addEventListener("onclick", nextTurn(1));
             }
             
             function failedAccess(numQ, functionName){
