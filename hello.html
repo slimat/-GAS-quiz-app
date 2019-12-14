@@ -39,14 +39,19 @@
             }
         };
     }();
-    
+
     async function ansButtonClicked(clickedNum){ // 回答ボタンがクリックされたときに, 正解・不正解を表示
         await google.script.run.withSuccessHandler(dispCorrectOrMiss).withFailureHandler(failedAccess).withUserObject(countObj.count, 'answerButtonClick').answerButtonClick(clickedNum, countObj.count)
-        document.getElementById("next").addEventListener("onclick", dream);
+        try {
+            document.getElementById("next").addEventListener("onclick", "dream()"); // change to "dream()"
+        } catch(e){
+            document.getElementById("Button4").insertAdjacentHTML("afterend","<p>error → hello.html → イベントハンドラの追加時 → " + e.message + "</p>");
+        }
+        document.getElementById("Button4").insertAdjacentHTML("afterend","<p>functionality added to 次へ進む</p>");
     }
 
     async function dream() {
-        countObj.countPlus();
+        countObj.countPlus(); // let
         try {
             await google.script.run.withSuccessHandler(returnQInfo).withFailureHandler(failedAccess).withUserObject(countObj.count, 'QAInfo').QAInfo(countObj.count);;
         } catch (e) {
