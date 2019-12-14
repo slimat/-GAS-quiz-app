@@ -23,61 +23,77 @@
     <input type="button" id="next" value="次に進む">
 
     <script>
-
-    var countObj = {
-        count: 0,
-        countPlus: function() {++this.count}
-    };
-
-    function ansButtonClicked(clickedNum){ // 回答ボタンがクリックされたときに, 正解・不正解を表示
-        google.script.run.withSuccessHandler(dispCorrectOrMiss).withFailureHandler(failedAccess).withUserObject(countObj.count, 'answerButtonClick').answerButtonClick(clickedNum, countObj.count)
-        try {
-            document.getElementById("next").addEventListener("onclick", dream); // change to "dream()"
-        } catch(e){
-            document.getElementById("Button4").insertAdjacentHTML("afterend","<p>error → hello.html → イベントハンドラの追加時 → " + e.message + "</p>");
-        }
-        document.getElementById("Button4").insertAdjacentHTML("afterend","<p>functionality added to 次へ進む</p>");
-    }
-
-    function dream() {
-        countObj.countPlus(); // let
-        try {
-            google.script.run.withSuccessHandler(returnQInfo).withFailureHandler(failedAccess).withUserObject(countObj.count, 'QAInfo').QAInfo(countObj.count);;
-        } catch (e) {
-            document.getElementById("Button4").insertAdjacentHTML('afterend','<p>error → hello.html → 問題文など取得時 → ' + e.message + '</p>');
-        }
-    }
-
-    function returnQInfo(data, d){
-        $("#qNum").html('問題' + d);
-        $("#qSentence").html(data[0][0]);
-        for (var j=1; j<=4; ++j){
-            $("#q" + j).html(data[0][j]);
-        }
-    }
-
-    function dispCorrectOrMiss(CorrectOrMiss){
-        if (CorrectOrMiss == 1){
-            $("#CorrectOrMiss").html('正解');
-        } else {
-            $("#CorrectOrMiss").html('不正解');
-        }
-
-    }
-
-    function failedAccess(numQ, functionName){
-        document.getElementById("Button4").insertAdjacentHTML('afterend','<p>missed to call' + functionName +  numQ + '</p>');
-    }
-
     try {
-        let count = 0;
-        do {
-            // document.getElementById("Button4").insertAdjacentHTML('afterend','<p>1であれば問題なし = ' + closer(0) + '</p>');
-            // ++count;
-            dream();
-        } while (count == 10);
-    } catch (k) {
-        document.getElementById("Button4").insertAdjacentHTML('afterend','<p>error → hello.html → do while文中→ ' + k.message + '</p>');
+        var countObj = {
+            count: 0,
+            qNumBefore: 0,
+            countPlus: function() {++this.count}
+        };
+
+        var closer = function(){
+            let b = 0;
+            return function(plusOr){
+                if (plusOr == 1){
+                    return ++b;
+                }else{
+                    return b;
+                }
+            };
+        }();
+
+        function ansButtonClicked(clickedNum){ // 回答ボタンがクリックされたときに, 正解・不正解を表示
+            google.script.run.withSuccessHandler(dispCorrectOrMiss).withFailureHandler(failedAccess).withUserObject(countObj.count, 'answerButtonClick').answerButtonClick(clickedNum, countObj.count)
+            if (countObj.qNumBefore !== countObj.count){
+                countObj.qNumBefore = countObj.count;
+                try {
+                    document.getElementById("next").addEventListener("onclick", dream, {once:true}); // change to "dream()"
+                } catch(e){
+                    document.getElementById("Button4").insertAdjacentHTML("afterend","<p>error → hello.html → イベントハンドラの追加時 → " + e.message + "</p>");
+                }
+                document.getElementById("Button4").insertAdjacentHTML("afterend","<p>functionality added to 次へ進む</p>");
+            }
+        }
+
+        function dream() {
+            countObj.countPlus(); // let
+            try {
+                google.script.run.withSuccessHandler(returnQInfo).withFailureHandler(failedAccess).withUserObject(countObj.count, 'QAInfo').QAInfo(countObj.count);;
+            } catch (e) {
+                document.getElementById("Button4").insertAdjacentHTML('afterend','<p>error → hello.html → 問題文など取得時 → ' + e.message + '</p>');
+            }
+        }
+
+        function returnQInfo(data, d){
+            $("#qNum").html('問題' + d);
+            $("#qSentence").html(data[0][0]);
+            for (var j=1; j<=4; ++j){
+                $("#q" + j).html(data[0][j]);
+            }
+        }
+
+        function dispCorrectOrMiss(CorrectOrMiss){
+            if (CorrectOrMiss == 1){
+                $("#CorrectOrMiss").html('正解');
+            } else {
+                $("#CorrectOrMiss").html('不正解');
+            }
+        }
+
+        function failedAccess(numQ, functionName){
+            document.getElementById("Button4").insertAdjacentHTML('afterend','<p>missed to call' + functionName +  numQ + '</p>');
+        }
+
+        try {
+            let count = 0;
+            do {
+                // document.getElementById("Button4").insertAdjacentHTML('afterend','<p>1であれば問題なし = ' + closer(0) + '</p>');
+                dream();
+            } while (count == 10);
+        } catch (k) {
+            document.getElementById("Button4").insertAdjacentHTML('afterend','<p>error → hello.html → do while文中→ ' + k.message + '</p>');
+        }
+    } catch(e) {
+        document.getElementById("Button4").insertAdjacentHTML('afterend','<p>error → hello.html → ' + e.message + '</p>');
     }
     </script>
 </body>
