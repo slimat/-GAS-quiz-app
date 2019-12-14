@@ -14,10 +14,10 @@
         <li id='q4'></li>
     </ol>
 
-    <input type="button" id="Button1" value="1" onclick="ansButtonClicked(this.value)">
-    <input type="button" id="Button2" value="2" onclick="ansButtonClicked(this.value)">
-    <input type="button" id="Button3" value="3" onclick="ansButtonClicked(this.value)">
-    <input type="button" id="Button4" value="4" onclick="ansButtonClicked(this.value)">
+    <input type="button" id="Button1" value="1" onclick="checkTheAnswer(this.value)">
+    <input type="button" id="Button2" value="2" onclick="checkTheAnswer(this.value)">
+    <input type="button" id="Button3" value="3" onclick="checkTheAnswer(this.value)">
+    <input type="button" id="Button4" value="4" onclick="checkTheAnswer(this.value)">
 
     <p id='CorrectOrMiss'></p>
     <input type="button" id="next" value="次に進む">
@@ -41,12 +41,13 @@
             };
         }();
 
-        function ansButtonClicked(clickedNum){ // 回答ボタンがクリックされたときに, 正解・不正解を表示
+        function checkTheAnswer(clickedNum){ // 回答ボタンがクリックされたときに, 正解・不正解を表示
             google.script.run.withSuccessHandler(dispCorrectOrMiss).withFailureHandler(failedAccess).withUserObject(countObj.count, 'answerButtonClick').answerButtonClick(clickedNum, countObj.count)
             if (countObj.qNumBefore !== countObj.count){
                 countObj.qNumBefore = countObj.count;
                 try {
-                    document.getElementById("next").addEventListener("onclick", dream, {once:true}); // change to "dream()"
+                    document.getElementById("next").style.background = '#0000ff';
+                    document.getElementById("next").addEventListener("onclick", nextQuestion, {once:true});
                 } catch(e){
                     document.getElementById("Button4").insertAdjacentHTML("afterend","<p>error → hello.html → イベントハンドラの追加時 → " + e.message + "</p>");
                 }
@@ -54,16 +55,16 @@
             }
         }
 
-        function dream() {
-            countObj.countPlus(); // let
+        function nextQuestion() {
+            countObj.countPlus();
             try {
-                google.script.run.withSuccessHandler(returnQInfo).withFailureHandler(failedAccess).withUserObject(countObj.count, 'QAInfo').QAInfo(countObj.count);;
+                google.script.run.withSuccessHandler(setQuestion).withFailureHandler(failedAccess).withUserObject(countObj.count, 'QAInfo').QAInfo(countObj.count);;
             } catch (e) {
                 document.getElementById("Button4").insertAdjacentHTML('afterend','<p>error → hello.html → 問題文など取得時 → ' + e.message + '</p>');
             }
         }
 
-        function returnQInfo(data, d){
+        function setQuestion(data, d){
             $("#qNum").html('問題' + d);
             $("#qSentence").html(data[0][0]);
             for (var j=1; j<=4; ++j){
@@ -87,7 +88,7 @@
             let count = 0;
             do {
                 // document.getElementById("Button4").insertAdjacentHTML('afterend','<p>1であれば問題なし = ' + closer(0) + '</p>');
-                dream();
+                nextQuestion();
             } while (count == 10);
         } catch (k) {
             document.getElementById("Button4").insertAdjacentHTML('afterend','<p>error → hello.html → do while文中→ ' + k.message + '</p>');
