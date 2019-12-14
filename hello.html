@@ -29,17 +29,6 @@
         countPlus: function() {++this.count}
     };
 
-    var closer = function(){
-        let b = 0;
-        return function(plusOr){
-            if (plusOr == 1){
-                return ++b;
-            }else{
-                return b;
-            }
-        };
-    }();
-
     function ansButtonClicked(clickedNum){ // 回答ボタンがクリックされたときに, 正解・不正解を表示
         google.script.run.withSuccessHandler(dispCorrectOrMiss).withFailureHandler(failedAccess).withUserObject(countObj.count, 'answerButtonClick').answerButtonClick(clickedNum, countObj.count)
         try {
