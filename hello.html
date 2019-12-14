@@ -19,7 +19,7 @@
     <input type="button" id="Button3" value="3" onclick="google.script.run.withSuccessHandler(dispCorrectOrMiss).withFailureHandler(failedAccess).withUserObject(countObj.count, 'answerButtonClick').answerButtonClick(this.value, countObj.count)">
     <input type="button" id="Button4" value="4" onclick="google.script.run.withSuccessHandler(dispCorrectOrMiss).withFailureHandler(failedAccess).withUserObject(countObj.count, 'answerButtonClick').answerButtonClick(this.value, countObj.count)">
 
-    <p id='CorrectOrMiss'><p>
+    <p id='CorrectOrMiss'></p>
     <input type="button" id="next" value="次に進む">
 
     <script>
@@ -47,15 +47,15 @@
                 };
             }();
             
-            function nextTurn(x){
+            function nextTurn(){
                 try {
-                    google.script.run.withSuccessHandler(returnQInfo).withFailureHandler(failedAccess).withUserObject(countObj.count), 'QAInfo').QAInfo(countObj.count);
+                    google.script.run.withSuccessHandler(returnQInfo).withFailureHandler(failedAccess).withUserObject(countObj.count, 'QAInfo').QAInfo(countObj.count);
                 } catch(e) {
                     document.getElementById("Button4").insertAdjacentHTML('afterend', '<p>error -> hello.html -> QAInfo呼び出し -> ' + e.message + '</p>');
                 }
             }
             
-            nextTurn(0);
+            nextTurn();
             
             
             
