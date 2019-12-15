@@ -14,87 +14,88 @@
         <li id='q4'></li>
     </ol>
 
-    <input type="button" id="Button1" value="1" onclick="checkTheAnswer(this.value)">
-    <input type="button" id="Button2" value="2" onclick="checkTheAnswer(this.value)">
-    <input type="button" id="Button3" value="3" onclick="checkTheAnswer(this.value)">
-    <input type="button" id="Button4" value="4" onclick="checkTheAnswer(this.value)">
+    <input type="button" id="Button1" value="1">
+    <input type="button" id="Button2" value="2">
+    <input type="button" id="Button3" value="3">
+    <input type="button" id="Button4" value="4">
 
     <p id='CorrectOrMiss'></p>
     <input type="button" id="next" value="次に進む">
 
     <script>
+    var countObj = {
+        count: 0,
+        qNumBefore: 0,
+        countPlus: function() {++this.count;},
+        four: 0
+    };
+
+    var checkTheAnswer = async function (clickedNum){ // 回答ボタンがクリックされたときに, 正解・不正解を表示
+        for (var l = 1; l <= 4; ++l){  // 回答ボタンの無効化
+            document.getElementById("Button" + l).style.opacity = 0.3;
+            document.getElementById("Button" + l).onclick = "";
+        }
+        await google.script.run.withSuccessHandler(dispCorrectOrMiss).withFailureHandler(failedAccess).withUserObject(countObj.count, 'answerButtonClick').answerButtonClick(clickedNum, countObj.count);
+        if (countObj.qNumBefore !== countObj.count){ // 同じ問題番号で2回以上回答ボタンを押せない
+            countObj.qNumBefore = countObj.count;
+            try {  // nextボタンを有効化
+                document.getElementById("next").style.background = '#0000ff';
+                document.getElementById("next").addEventListener("click", nextQuestion, {once:true});
+            } catch(e){
+                document.getElementById("Button4").insertAdjacentHTML("afterend","<p>error → hello.html → イベントハンドラの追加時 → " + e.message + "</p>");
+            }
+            document.getElementById("Button4").insertAdjacentHTML("afterend","<p>functionality added to 次へ進む</p>");
+        }
+    }
+
+    async function nextQuestion() { // 次の問題文を取得
+        countObj.countPlus();
+        try { // 問題文の取得
+            await google.script.run.withSuccessHandler(setQuestion).withFailureHandler(failedAccess).withUserObject(countObj.count, 'QAInfo').QAInfo(countObj.count);
+        } catch (e) {
+            document.getElementById("Button4").insertAdjacentHTML('afterend','<p>error → hello.html → 問題文など取得時 → ' + e.message + '</p>');
+        }
+        document.getElementById("Button4").insertAdjacentHTML('afterend','<p>countObj.four = ' + countObj.four + '</p>');
+        for (let x = 1; x <= 4; ++x){
+            document.getElementById("Button" + x).style.opacity = 1;
+            try { // 回答ボタンの有効化
+                document.getElementById("Button" + x).addEventListener("click", {tmp: (() => {countObj.four = x;})(), handleEvent: function handleEvent(event){checkTheAnswer(`${x}`);}}); // 回答ボタンの有効化
+            } catch(e) {
+                document.getElementById("Button4").insertAdjacentHTML('afterend','<p>error → hello.html → 回答ボタン有効化時 → ' + e.message + '</p>');
+            }
+        }
+        countObj.four = x;
+        document.getElementById("Button4").insertAdjacentHTML('afterend','<p>countObj.four = ' + countObj.four + '</p>');        
+    }
+
+    function setQuestion(data, d){
+        $("#qNum").html('問題' + d);
+        $("#qSentence").html(data[0][0]);
+        for (var j=1; j<=4; ++j){
+            $("#q" + j).html(data[0][j]);
+        }
+    }
+
+    function dispCorrectOrMiss(CorrectOrMiss){
+        if (CorrectOrMiss == 1){
+            $("#CorrectOrMiss").html('正解');
+        } else {
+            $("#CorrectOrMiss").html('不正解');
+        }
+    }
+
+    function failedAccess(numQ, functionName){
+        document.getElementById("Button4").insertAdjacentHTML('afterend','<p>missed to call' + functionName +  numQ + '</p>');
+    }
+
     try {
-        var countObj = {
-            count: 0,
-            qNumBefore: 0,
-            countPlus: function() {++this.count}
-        };
-
-        var closer = function(){
-            let b = 0;
-            return function(plusOr){
-                if (plusOr == 1){
-                    return ++b;
-                }else{
-                    return b;
-                }
-            };
-        }();
-
-        function checkTheAnswer(clickedNum){ // 回答ボタンがクリックされたときに, 正解・不正解を表示
-            google.script.run.withSuccessHandler(dispCorrectOrMiss).withFailureHandler(failedAccess).withUserObject(countObj.count, 'answerButtonClick').answerButtonClick(clickedNum, countObj.count)
-            if (countObj.qNumBefore !== countObj.count){
-                countObj.qNumBefore = countObj.count;
-                try {
-                    document.getElementById("next").style.background = '#0000ff';
-                    document.getElementById("next").addEventListener("onclick", nextQuestion, {once:true});
-                } catch(e){
-                    document.getElementById("Button4").insertAdjacentHTML("afterend","<p>error → hello.html → イベントハンドラの追加時 → " + e.message + "</p>");
-                }
-                document.getElementById("Button4").insertAdjacentHTML("afterend","<p>functionality added to 次へ進む</p>");
-            }
-        }
-
-        function nextQuestion() {
-            countObj.countPlus();
-            try {
-                google.script.run.withSuccessHandler(setQuestion).withFailureHandler(failedAccess).withUserObject(countObj.count, 'QAInfo').QAInfo(countObj.count);;
-            } catch (e) {
-                document.getElementById("Button4").insertAdjacentHTML('afterend','<p>error → hello.html → 問題文など取得時 → ' + e.message + '</p>');
-            }
-        }
-
-        function setQuestion(data, d){
-            $("#qNum").html('問題' + d);
-            $("#qSentence").html(data[0][0]);
-            for (var j=1; j<=4; ++j){
-                $("#q" + j).html(data[0][j]);
-            }
-        }
-
-        function dispCorrectOrMiss(CorrectOrMiss){
-            if (CorrectOrMiss == 1){
-                $("#CorrectOrMiss").html('正解');
-            } else {
-                $("#CorrectOrMiss").html('不正解');
-            }
-        }
-
-        function failedAccess(numQ, functionName){
-            document.getElementById("Button4").insertAdjacentHTML('afterend','<p>missed to call' + functionName +  numQ + '</p>');
-        }
-
-        try {
-            let count = 0;
-            do {
-                // document.getElementById("Button4").insertAdjacentHTML('afterend','<p>1であれば問題なし = ' + closer(0) + '</p>');
-                nextQuestion();
-            } while (count == 10);
-        } catch (k) {
-            document.getElementById("Button4").insertAdjacentHTML('afterend','<p>error → hello.html → do while文中→ ' + k.message + '</p>');
-        }
-    } catch(e) {
-        document.getElementById("Button4").insertAdjacentHTML('afterend','<p>error → hello.html → ' + e.message + '</p>');
+        let count = 0;
+        do {
+            // document.getElementById("Button4").insertAdjacentHTML('afterend','<p>1であれば問題なし = ' + closer(0) + '</p>');
+            nextQuestion();
+        } while (count == 10);
+    } catch (k) {
+        document.getElementById("Button4").insertAdjacentHTML('afterend','<p>error → hello.html → do while文中→ ' + k.message + '</p>');
     }
     </script>
 </body>
