@@ -19,7 +19,7 @@
 	<input type="button" id="Button3" value="3">
 	<input type="button" id="Button4" value="4">
 	
-	<p id='CorrectOrMiss'></p> <!-- 正解･不正解を表示 -->
+	<p id='CorrectOrMiss'>ここに正解･不正解が表示されます</p> <!-- 正解･不正解を表示 -->
 	<input type="button" id="next" value="次に進む">
 	
 	<script>
@@ -27,7 +27,6 @@
 		count: 0,
 		qNumBefore: 0,
 		countPlus: function() {++this.count;},
-		four: 0
 	};
 	
 	var checkTheAnswer = async function (clickedNum){ // 回答ボタンがクリックされたときに, 正解・不正解を表示
@@ -38,53 +37,40 @@
 		await google.script.run.withSuccessHandler(dispCorrectOrMiss).withFailureHandler(failedAccess).withUserObject(countObj.count, 'answerButtonClick').answerButtonClick(clickedNum, countObj.count);
 	}
 	
-	function callQAInfo(){
-		return new Promise((resolve, reject) => {
-			//          const a = resolve;
-			//          google.script.run.withSuccessHandler(setQuestion).withFailureHandler(failedAccess).withUserObject(countObj.count, 'QAInfo', a).QAInfo(countObj.count);
-			google.script.run.withSuccessHandler(setQuestion).withFailureHandler(failedAccess).withUserObject({countObjCount: countObj.count, QAInfo: 'QAInfo', resolveA: resolve}).QAInfo(countObj.count);
+	function callQAInfo(){ // 次の問題文･選択肢を取得及び表示
+		return new Promise((resolve, reject) => { // Promiseのインスタンスを返す
+			google.script.run.withSuccessHandler(setQuestion).withFailureHandler(failedAccess).withUserObject({countObjCount: countObj.count, calledFunctionInGS: QAInfo, resolveA: resolve, rejectA: reject}).QAInfo(countObj.count); // countObj.count番目の問題を出題
 		});
 	}
 	
-	async function nextQuestion() { // 次の問題文を取得
+	async function nextQuestion() { // 次の問題文と選択肢の取得及び表示 と 回答ボタンの表示及び有効化
 		$("#CorrectOrMiss").html('');// 前回の正解･不正解を非表示にする
 		$("#next").style.opacity = 0; // 次に進むボタンを見えなくする
 		$("#next").onclick = ""; // 次に進むボタンの無効化
-		countObj.countPlus();
-		//        document.getElementById("Button4").insertAdjacentHTML('afterend','<p>countObj.four(forの前) = ' + countObj.four + '</p>'); // ページに表示
-		try { // 問題文の取得
-			await callQAInfo(); // 問題文の取得が終了するまで回答ボタンが表示されない
-			//            document.getElementById("Button4").insertAdjacentHTML('afterend', '<p>問題文の表示完了!</p>');
+		countObj.countPlus(); // 問題番号をインクリメント
+		try { // 問題文･選択肢の取得及び表示
+			await callQAInfo(); // 問題文の取得及び表示が終了するまで実行が停止
 		} catch (e) {
-			document.getElementById("Button4").insertAdjacentHTML('afterend','<p>error → hello.html → 問題文など取得時 → ' + e.message + '</p>'); // エラー時ページに表示
+			document.getElementById("Button4").insertAdjacentHTML('afterend','<p>error → hello.html → 問題文など取得時 → ' + e.message + '</p>'); // エラー時に画面出力
 		}
 		
 		for (let x = 1; x <= 4; ++x){
-			document.getElementById("Button" + x).style.opacity = 1;
-			try { // 回答ボタンの有効化
-				document.getElementById("Button" + x).addEventListener("click", {tmp: (() => {countObj.four = x;})(), handleEvent: function (event){checkTheAnswer(x);}}); // 回答ボタンの有効化
-				//                document.addEventListener("click", {tmp: (() => {countObj.four = x;})(), handleEvent: handleEvent}); // 回答ボタンの有効化
-			} catch(e) {
-				document.getElementById("Button4").insertAdjacentHTML('afterend','<p>error → hello.html → 回答ボタン有効化時 → ' + e.message + '</p>'); // エラー時ページに表示
+			document.getElementById("Button" + x).style.opacity = 1; // 回答ボタンの表示
+			try { // 回答ボタンの有効化時に発生しうるエラーに対するハンドラの追加
+				document.getElementById("Button" + x).addEventListener("click", () => {checkTheAnswer(x);}); // 回答ボタンの有効化
+			} catch(e) { // もしエラーが発生した場合は
+				document.getElementById("Button4").insertAdjacentHTML('afterend','<p>error → hello.html → 回答ボタン有効化時 → ' + e.message + '</p>'); // エラー時に画面出力
 			}
-			//            document.getElementById("Button4").insertAdjacentHTML('afterend','<p>countObj.four(for内) = ' + countObj.four + '</p>'); // ページに表示
 		}
-		countObj.four = x;
-		//        document.getElementById("Button4").insertAdjacentHTML('afterend','<p>countObj.four(for外) = ' + countObj.four + '</p>'); // ページに表示      
 	}
 	
 	function setQuestion(data, d){ // 問題文と選択肢を表示
-		$("#qNum").html('問題' + d.countObjCount);
-		$("#qSentence").html(data[0][0]);
+		$("#qNum").html('問題' + d.countObjCount); // 問題番号を表示
+		$("#qSentence").html(data[0][0]); // 問題文を表示
 		for (var j=1; j<=4; ++j){
-			$("#q" + j).html(data[0][j]);
-		}
-		//        document.getElementById("Button4").insertAdjacentHTML('afterend', '<p>d.resolveA = ' + d.resolveA + '</p>');
-		//        document.getElementById("Button4").insertAdjacentHTML('afterend', '<p>d.QAInfo = ' + d.QAInfo + '</p>');
-		//        document.getElementById("Button4").insertAdjacentHTML('afterend', '<p>res = ' + resolveOfCallQAInfo + '</p>');
-		
-		d.resolveA();
-		
+			$("#q" + j).html(data[0][j]); // 選択肢を表示
+        }
+		d.resolveA(); // Promiseのインスタンス値をfulfilledにする
 	}
 	
 	function dispCorrectOrMiss(OrMiss){ // 正解･不正解を表示
@@ -102,23 +88,14 @@
 			} catch(e){
 				document.getElementById("Button4").insertAdjacentHTML("afterend","<p>error → hello.html → イベントハンドラの追加時 → " + e.message + "</p>"); // ページに表示
 			}
-			//            document.getElementById("Button4").insertAdjacentHTML("afterend","<p>functionality added to 次へ進む</p>"); // ページに表示
 		}
 	}
 	
-	function failedAccess(numQ, functionName){ // gs関数の呼び出しに失敗したら
-		document.getElementById("Button4").insertAdjacentHTML('afterend','<p>missed to call' + functionName +  numQ + '</p>'); // ページに表示
+	function failedAccess(numQ, withUserObject){ // gs関数の呼び出しに失敗したら
+		document.getElementById("Button4").insertAdjacentHTML('afterend','<p>missed to call' + withUserObject.calledFunctionInGS.name + ' 問題番号 : ' numQ + '</p>'); // ページに表示
 	}
 	
-	try {
-		let count = 0;
-		do {
-			// document.getElementById("Button4").insertAdjacentHTML('afterend','<p>1であれば問題なし = ' + closer(0) + '</p>');
-			nextQuestion();
-		} while (count == 10);
-	} catch (k) {
-		document.getElementById("Button4").insertAdjacentHTML('afterend','<p>error → hello.html → do while文中→ ' + k.message + '</p>'); // ページに表示
-	}
+	nextQuestion();
 	</script>
 </body>
 </html>
