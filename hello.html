@@ -60,7 +60,7 @@
 	var checkTheAnswer = async function (clickedNum){
 		for (let l = 1; l <= 4; ++l){  // 回答ボタンの無効化
 			$("#Button" + l).css("opacity", 0.3); // 回答ボタンの透明度を高める
-			$("#Button" + l)[0].setAttribute("onclick", "checkTheAnswer(" + l + ")"); // 回答ボタンの無効化
+			$("#Button" + l)[0].setAttribute("onclick", ""); // 回答ボタンの無効化
 		}
 		await google.script.run.withSuccessHandler(dispCorrectOrMiss).withFailureHandler(failedAccess).withUserObject({qNum: countObj.count, calledFunctionInGS: 'answerButtonClick'}).answerButtonClick(clickedNum, countObj.count);
         try {  // nextボタンを有効化
