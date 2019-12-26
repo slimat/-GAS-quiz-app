@@ -1,27 +1,8 @@
-var obj = {
-    count: 0,
-    countUp: function() {
-        return ++this.count;
-    }
-};
-
-var closer = function(){ // 使用不可
-    var b = 1;
-    Logger.log("obj.count = " + obj.countUp());
-    return function(plusOr){
-        Logger.log("plusor = " + plusOr);
-        if (plusOr == 1){
-            Logger.log("++b = " + ++b);
-            return b;
-        }else{
-            return b;
-        }
-    };
-}();
-
 var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("シート1"); // "シート1"を取得
+var scriptProperties = PropertiesService.getScriptProperties();
 
 function doGet() {
+    scriptProperties.setProperty('closer', '1');
     Logger.log('doGet関数呼び出し完了');
     try {
         var template = HtmlService.createTemplateFromFile("hello").evaluate(); // テンプレートオブジェクトの取得
@@ -40,8 +21,9 @@ function QAInfo(count) { // evaluate後に呼び出されるので, doGet関数�
 }
 
 function answerButtonClick(click_value, numQ) {
+    scriptProperties.setProperty('closer', "a".replace("a", function (){return String(Number(scriptProperties.getProperty('closer')) + 0);}));
     Logger.log('answerButtonClickの呼び出し完了, click_value = ' + click_value);
-//    Logger.log("F" + closer(1) + "であればOK : F" + (numQ + 1));
+    Logger.log("F" + scriptProperties.getProperty('closer') + "であればOK : F" + (numQ + 1));
     if(sheet.getRange("F" + (numQ + 1)).getValues() == Number(click_value)){
         Logger.log('正解');
         return 1;

@@ -31,68 +31,68 @@
 	
 	var checkTheAnswer = async function (clickedNum){ // 回答ボタンがクリックされたときに, 正解・不正解を表示
 		for (let l = 1; l <= 4; ++l){  // 回答ボタンの無効化
-			$("#Button" + l).style.opacity = 0.3;
-			$("#Button" + l).onclick = "";
+			$("#Button" + l).css("opacity", 0.3); // 回答ボタンの透明度を高める
+			$("#Button" + l).click(); // 回答ボタンのクリックイベントのハンドラを削除
 		}
-		await google.script.run.withSuccessHandler(dispCorrectOrMiss).withFailureHandler(failedAccess).withUserObject(countObj.count, 'answerButtonClick').answerButtonClick(clickedNum, countObj.count);
+		await google.script.run.withSuccessHandler(dispCorrectOrMiss).withFailureHandler(failedAccess).withUserObject({qNum: countObj.count, calledFunctionInGS: 'answerButtonClick'}).answerButtonClick(clickedNum, countObj.count);
+        try {  // nextボタンを有効化
+            $("#next")[0].addEventListener("click", nextQuestion, {once: true});
+        } catch(e) {
+            $("#Button4").after("<p>error → hello.html → イベントハンドラの追加時 → " + e.message + "</p>"); // ページに表示
+        }        
 	}
 	
 	function callQAInfo(){ // 次の問題文･選択肢を取得及び表示
 		return new Promise((resolve, reject) => { // Promiseのインスタンスを返す
-			google.script.run.withSuccessHandler(setQuestion).withFailureHandler(failedAccess).withUserObject({countObjCount: countObj.count, calledFunctionInGS: QAInfo, resolveA: resolve, rejectA: reject}).QAInfo(countObj.count); // countObj.count番目の問題を出題
+			google.script.run.withSuccessHandler(setQuestion).withFailureHandler(failedAccess).withUserObject({qNum: countObj.count, calledFunctionInGS: "QAInfo", resolveA: resolve, rejectA: reject}).QAInfo(countObj.count); // countObj.count番目の問題を出題
 		});
 	}
-	
+    
 	async function nextQuestion(){ // 次の問題文と選択肢の取得及び表示 と 回答ボタンの表示及び有効化
-		$("#CorrectOrMiss").html('');// 前回の正解･不正解を非表示にする
-		$("#next").style.opacity = 0; // 次に進むボタンを見えなくする
-		$("#next").onclick = ""; // 次に進むボタンの無効化
+		$("#CorrectOrMiss").text('');// 前回の正解･不正解を非表示にする
+		$("#next").css("opacity", 1); // 次に進むボタンを見えなくする
+		$("#next").click(); // 次に進むボタンの無効化
 		countObj.countPlus(); // 問題番号をインクリメント
 		try { // 問題文･選択肢の取得及び表示
 			await callQAInfo(); // 問題文の取得及び表示が終了するまで実行が停止
 		} catch (e) {
-			$("#Button4").insertAdjacentHTML('afterend','<p>error → hello.html → 問題文など取得時 → ' + e.message + '</p>'); // エラー時に画面出力
+			$("#Button4").after('<p>error → hello.html → 問題文など取得時 → ' + e.message + '</p>'); // エラー時に画面出力
 		}
 		
 		for (let x = 1; x <= 4; ++x){
-			$("#Button" + x).style.opacity = 1; // 回答ボタンの表示
+			$("#Button" + x).css("opacity", 1); // 回答ボタンの表示
 			try { // 回答ボタンの有効化時に発生しうるエラーに対するハンドラの追加
-				$("#Button" + x).addEventListener("click", () => {checkTheAnswer(x);}); // 回答ボタンの有効化
+				$("#Button" + x)[0].addEventListener("click", () => {checkTheAnswer(x);}); // 回答ボタンの有効化
 			} catch(e) { // もしエラーが発生した場合は
-				$("#Button4").insertAdjacentHTML('afterend','<p>error → hello.html → 回答ボタン有効化時 → ' + e.message + '</p>'); // エラー時に画面出力
+				$("#Button4").after('<p>error → hello.html → 回答ボタン有効化時 → ' + e.message + '</p>'); // エラー時に画面出力
 			}
 		}
 	}
 	
 	function setQuestion(data, d){ // 問題文と選択肢を表示
-		$("#qNum").html('問題' + d.countObjCount); // 問題番号を表示
-		$("#qSentence").html(data[0][0]); // 問題文を表示
+		$("#qNum").text('問題' + d.qNum); // 問題番号を表示
+		$("#qSentence").text(data[0][0]); // 問題文を表示
 		for (let j=1; j<=4; ++j){
-			$("#q" + j).html(data[0][j]); // 選択肢を表示
+			$("#q" + j).text(data[0][j]); // 選択肢を表示
         }
 		d.resolveA(); // Promiseのインスタンス値をfulfilledにする
 	}
 	
 	function dispCorrectOrMiss(OrMiss){ // 正解･不正解を表示
 		if (OrMiss == 1){
-			$("#CorrectOrMiss").html('正解');
+			$("#CorrectOrMiss").text('正解');
 		} else {
-			$("#CorrectOrMiss").html('不正解');
+			$("#CorrectOrMiss").text('不正解');
 		}
-		$("#next").style.opacity = 1; // 次に進むボタンを表示
-		if (countObj.qNumBefore !== countObj.count){ // 同じ問題番号で2回以上回答ボタンを押せない
-			countObj.qNumBefore = countObj.count;
-			try {  // nextボタンを有効化
-				//                $("#next").style.background = '#0000ff';
-				$("#next").addEventListener("click", nextQuestion, {once:true});
-			} catch(e) {
-				$("#Button4").insertAdjacentHTML("afterend","<p>error → hello.html → イベントハンドラの追加時 → " + e.message + "</p>"); // ページに表示
-			}
-		}
+		$("#next").css("opacity", 1); // 次に進むボタンを表示
+//		if (countObj.qNumBefore !== countObj.count){ // 同じ問題番号で2回以上回答ボタンを押せない
+//			countObj.qNumBefore = countObj.count;
+
+//		}
 	}
 	
-	function failedAccess(numQ, withUserObject){ // gs関数の呼び出しに失敗したら
-		$("#Button4").insertAdjacentHTML('afterend','<p>missed to call' + withUserObject.calledFunctionInGS.name + ' 問題番号 : ' numQ + '</p>'); // ページに表示
+	function failedAccess(numQ, obj){ // gs関数の呼び出しに失敗したら
+		$("#Button4").after('<p>missed to call ' + obj.calledFunctionInGS + ' 問題番号 : ' + numQ + '</p>'); // ページに表示
 	}
 	
 	nextQuestion();
