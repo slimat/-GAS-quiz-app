@@ -14,10 +14,10 @@
 		<li id='q4'></li>
 	</ol>
 	
-	<input type="button" id="Button1" value="1">
-	<input type="button" id="Button2" value="2">
-	<input type="button" id="Button3" value="3">
-	<input type="button" id="Button4" value="4">
+	<input type="button" id="Button1" value="1" onclick="checkTheAnswer(1)">
+	<input type="button" id="Button2" value="2" onclick="checkTheAnswer(2)">
+	<input type="button" id="Button3" value="3" onclick="checkTheAnswer(3)">
+	<input type="button" id="Button4" value="4" onclick="checkTheAnswer(4)">
 	
 	<p id='CorrectOrMiss'>ここに正解･不正解が表示されます</p> <!-- 正解･不正解を表示 -->
 	<input type="button" id="next" value="次に進む">
@@ -29,12 +29,6 @@
 		countPlus: function() {++this.count;},
         four: 0,
 	};
-    
-    /////////////////////////////////////////// 回答ボタンがクリックされたときに最初に呼ばれる関数 ///////////////////////////////////////////
-    
-    function callCheckTheAnswer(){
-        checkTheAnswer(x);
-    }
     
     /////////////////////////////////////////// 次の問題文と選択肢の取得及び表示 と 回答ボタンの表示及び有効化 ///////////////////////////////////////////
     
@@ -54,7 +48,7 @@
 		for (let x = 1; x <= 4; ++x){
 			$("#Button" + x).css("opacity", 1); // 回答ボタンの表示
 			try { // 回答ボタンの有効化時に発生しうるエラーに対するハンドラの追加
-				$("#Button" + x)[0].addEventListener("click", callCheckTheAnswer); // 回答ボタンの有効化
+				$("#Button" + x)[0].setAttribute("onclick","checkTheAnswer(" + x + ")"); // 回答ボタンの有効化
 			} catch(e) { // もしエラーが発生した場合は
 				$("#Button4").after('<p>error → hello.html → 回答ボタン有効化時 → ' + e.message + '</p>'); // エラー時に画面出力
 			}
@@ -66,7 +60,7 @@
 	var checkTheAnswer = async function (clickedNum){
 		for (let l = 1; l <= 4; ++l){  // 回答ボタンの無効化
 			$("#Button" + l).css("opacity", 0.3); // 回答ボタンの透明度を高める
-			$("#Button" + l)[0].removeEventListener("click", callCheckTheAnswer); // 回答ボタンの無効化
+			$("#Button" + l)[0].setAttribute("onclick", "checkTheAnswer(" + l + ")"); // 回答ボタンの無効化
 		}
 		await google.script.run.withSuccessHandler(dispCorrectOrMiss).withFailureHandler(failedAccess).withUserObject({qNum: countObj.count, calledFunctionInGS: 'answerButtonClick'}).answerButtonClick(clickedNum, countObj.count);
         try {  // nextボタンを有効化
