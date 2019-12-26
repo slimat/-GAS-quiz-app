@@ -32,7 +32,7 @@
 	var checkTheAnswer = async function (clickedNum){ // 回答ボタンがクリックされたときに, 正解・不正解を表示
 		for (let l = 1; l <= 4; ++l){  // 回答ボタンの無効化
 			$("#Button" + l).css("opacity", 0.3); // 回答ボタンの透明度を高める
-			$("#Button" + l).click(); // 回答ボタンのクリックイベントのハンドラを削除
+			$("#Button" + l).off("click"); // 回答ボタンのクリックイベントのハンドラを削除
 		}
 		await google.script.run.withSuccessHandler(dispCorrectOrMiss).withFailureHandler(failedAccess).withUserObject({qNum: countObj.count, calledFunctionInGS: 'answerButtonClick'}).answerButtonClick(clickedNum, countObj.count);
         try {  // nextボタンを有効化
@@ -50,11 +50,11 @@
     
 	async function nextQuestion(){ // 次の問題文と選択肢の取得及び表示 と 回答ボタンの表示及び有効化
 		$("#CorrectOrMiss").text('');// 前回の正解･不正解を非表示にする
-		$("#next").css("opacity", 1); // 次に進むボタンを見えなくする
-		$("#next").click(); // 次に進むボタンの無効化
+		$("#next").off("click"); // 次に進むボタンの無効化
+        $("#next").css("opacity", 0.3); // 次に進むボタンの透明度を上げる
 		countObj.countPlus(); // 問題番号をインクリメント
-		try { // 問題文･選択肢の取得及び表示
-			await callQAInfo(); // 問題文の取得及び表示が終了するまで実行が停止
+		try { // 問題文･選択肢の取得及び表示処理時に
+			await callQAInfo(); // 問題文及び選択肢の取得及び表示が終了するまで実行が停止
 		} catch (e) {
 			$("#Button4").after('<p>error → hello.html → 問題文など取得時 → ' + e.message + '</p>'); // エラー時に画面出力
 		}
@@ -91,8 +91,8 @@
 //		}
 	}
 	
-	function failedAccess(numQ, obj){ // gs関数の呼び出しに失敗したら
-		$("#Button4").after('<p>missed to call ' + obj.calledFunctionInGS + ' 問題番号 : ' + numQ + '</p>'); // ページに表示
+	function failedAccess(err, obj){ // gs関数の呼び出しに失敗したら
+		$("#Button4").after('<p>missed to call ' + obj.calledFunctionInGS + ' error : ' + err + '</p>'); // ページに表示
 	}
 	
 	nextQuestion();

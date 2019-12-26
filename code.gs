@@ -21,7 +21,7 @@ function QAInfo(count) { // evaluate後に呼び出されるので, doGet関数�
 }
 
 function answerButtonClick(click_value, numQ) {
-    scriptProperties.setProperty('closer', "a".replace("a", function (){return String(Number(scriptProperties.getProperty('closer')) + 0);}));
+    scriptProperties.setProperty('closer', "a".replace("a", function (){return String(Number(scriptProperties.getProperty('closer')) + 1);}));
     Logger.log('answerButtonClickの呼び出し完了, click_value = ' + click_value);
     Logger.log("F" + scriptProperties.getProperty('closer') + "であればOK : F" + (numQ + 1));
     if(sheet.getRange("F" + (numQ + 1)).getValues() == Number(click_value)){
