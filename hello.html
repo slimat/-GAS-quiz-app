@@ -32,14 +32,14 @@
     
     /////////////////////////////////////////// 回答ボタンがクリックされたときに最初に呼ばれる関数 ///////////////////////////////////////////
     
-    function callCheckTheAnswer(){++countObj.four; checkTheAnswer(countObj.four);}
+//    function callCheckTheAnswer(){++countObj.four; checkTheAnswer(countObj.four);}
     
     /////////////////////////////////////////// 次の問題文と選択肢の取得及び表示 と 回答ボタンの表示及び有効化 ///////////////////////////////////////////
     
 	async function nextQuestion(){
         countObj.countPlus(); // 問題番号をインクリメント
 		$("#CorrectOrMiss").text('');// 前回の正解･不正解を非表示にする
-        if !(countObj.count == 1){ // 一度次に進むボタンが有効化されていたら無効にする
+        if (countObj.count !== 1){ // 一度次に進むボタンが有効化されていたら無効にする
             $("#next")[0].removeEventListener("click",nextQuestion); // 次に進むボタンの無効化
         }
         $("#next").css("opacity", 0.3); // 次に進むボタンの透明度を上げる
@@ -65,7 +65,7 @@
 	var checkTheAnswer = async function (clickedNum){
 		for (let l = 1; l <= 4; ++l){  // 回答ボタンの無効化
 			$("#Button" + l).css("opacity", 0.3); // 回答ボタンの透明度を高める
-			$("#Button" + l)[0].removeEventListener("click", callCheckTheAnswer); // 回答ボタンのクリックイベントのハンドラを削除
+			$("#Button" + l)[0].removeEventListener("click", checkTheAnswer); // 回答ボタンのクリックイベントのハンドラを削除
 		}
 		await google.script.run.withSuccessHandler(dispCorrectOrMiss).withFailureHandler(failedAccess).withUserObject({qNum: countObj.count, calledFunctionInGS: 'answerButtonClick'}).answerButtonClick(clickedNum, countObj.count);
         try {  // nextボタンを有効化
