@@ -1,29 +1,48 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<base target="_top">
-	<script src="https://code.jquery.com/jquery-3.1.1.js"></script>
+<base target="_top">
+<script src="https://code.jquery.com/jquery-3.1.1.js"></script>
 </head>
 <body>
 	<p id="qNum">おはよう</p>
 	<p id='qSentence'>こんにちは</p> <!-- 問題文を取得 -->
-	<ol>
+	<ol id="qOL">
 		<li id='q1'></li> <!-- 選択肢1を表示 -->
 		<li id='q2'></li>
 		<li id='q3'></li>
 		<li id='q4'></li>
 	</ol>
 	
-	<input type="button" id="Button1" value="1" onclick="checkTheAnswer(1)">
-	<input type="button" id="Button2" value="2" onclick="checkTheAnswer(2)">
-	<input type="button" id="Button3" value="3" onclick="checkTheAnswer(3)">
-	<input type="button" id="Button4" value="4" onclick="checkTheAnswer(4)">
-	
+	<!--
+    <input type="button" id="Button1" onclick="checkTheAnswer(1)">
+	<input type="button" id="Button2" onclick="checkTheAnswer(2)">
+	<input type="button" id="Button3" onclick="checkTheAnswer(3)">
+	<input type="button" id="Button4" onclick="checkTheAnswer(4)">
+	-->
+    
 	<p id='CorrectOrMiss'>ここに正解･不正解が表示されます</p> <!-- 正解･不正解を表示 -->
 	<input type="button" id="next" value="次に進む">
 	
 	<script>
-	var countObj = {
+    let elementInputObj = new Object();
+    let elementInputName = ['oneElementInput', 'twoElementInput', 'threeElementInput', 'fourElementInput'];
+    let elementInputOne, elementInputTwo, elementInputThree, elementInputFour;
+    
+    for (let i=1; i<3; ++i){
+        let elementInput = document.createElement("input");
+        if (i == 2){
+            elementInputTwo = elementInput;
+        } else if (i == 1) {
+            elementInputOne = elementInput;
+        }
+        elementInput.setAttribute("id", "Button" + i);
+        elementInput.setAttribute("type", "Button");
+        elementInput.setAttribute("value", i);
+        $("body")[0].insertBefore(elementInput, document.getElementById("CorrectOrMiss"));
+    }
+    
+	let countObj = {
 		count: 0,
 		qNumBefore: 0,
 		countPlus: function() {++this.count;},
@@ -32,7 +51,7 @@
     
     /////////////////////////////////////////// 次の問題文と選択肢の取得及び表示 と 回答ボタンの表示及び有効化 ///////////////////////////////////////////
     
-	async function nextQuestion(){
+	let nextQuestion = async function (){
         countObj.countPlus(); // 問題番号をインクリメント
 		$("#CorrectOrMiss").text('');// 前回の正解･不正解を非表示にする
         if (countObj.count !== 1){ // 一度次に進むボタンが有効化されていたら無効にする
@@ -45,10 +64,10 @@
 			$("#Button4").after('<p>error → hello.html → 問題文など取得時 → ' + e.message + '</p>'); // エラー時に画面出力
 		}
 		
-		for (let x = 1; x <= 4; ++x){
-			$("#Button" + x).css("opacity", 1); // 回答ボタンの表示
+		for (let i = 1; i <= 4; ++i){
+			$("#Button" + i).css("opacity", 1); // 回答ボタンの表示
 			try { // 回答ボタンの有効化時に発生しうるエラーに対するハンドラの追加
-				$("#Button" + x)[0].setAttribute("onclick","checkTheAnswer(" + x + ")"); // 回答ボタンの有効化
+				$("#Button" + i)[0].setAttribute("onclick","checkTheAnswer(" + i + ")"); // 回答ボタンの有効化
 			} catch(e) { // もしエラーが発生した場合は
 				$("#Button4").after('<p>error → hello.html → 回答ボタン有効化時 → ' + e.message + '</p>'); // エラー時に画面出力
 			}
@@ -57,10 +76,10 @@
     
 	/////////////////////////////////////////// 回答ボタンがクリックされたときに, 正解・不正解を表示 ///////////////////////////////////////////
     
-	var checkTheAnswer = async function (clickedNum){
-		for (let l = 1; l <= 4; ++l){  // 回答ボタンの無効化
-			$("#Button" + l).css("opacity", 0.3); // 回答ボタンの透明度を高める
-			$("#Button" + l)[0].setAttribute("onclick", ""); // 回答ボタンの無効化
+	let checkTheAnswer = async function (clickedNum){
+		for (let i = 1; i <= 4; ++i){  // 回答ボタンの無効化
+			$("#Button" + i).css("opacity", 0.3); // 回答ボタンの透明度を高める
+			$("#Button" + i)[0].setAttribute("onclick", ""); // 回答ボタンの無効化
 		}
 		await google.script.run.withSuccessHandler(dispCorrectOrMiss).withFailureHandler(failedAccess).withUserObject({qNum: countObj.count, calledFunctionInGS: 'answerButtonClick'}).answerButtonClick(clickedNum, countObj.count);
         try {  // nextボタンを有効化
@@ -72,7 +91,7 @@
 	
     /////////////////////////////////////////// 次の問題文･選択肢を取得及び表示 ///////////////////////////////////////////
     
-	function callQAInfo(){
+	let callQAInfo = function (){
 		return new Promise((resolve, reject) => { // Promiseのインスタンスを返す
 			google.script.run.withSuccessHandler(setQuestion).withFailureHandler(failedAccess).withUserObject({qNum: countObj.count, calledFunctionInGS: "QAInfo", resolveA: resolve, rejectA: reject}).QAInfo(countObj.count); // countObj.count番目の問題を出題
 		});
@@ -80,18 +99,37 @@
     
     /////////////////////////////////////////// 問題文と選択肢を表示 ///////////////////////////////////////////
     
-	function setQuestion(data, d){
+	let setQuestion = function (data, d){
+        if (document.getElementById("Button3") !== null){
+            document.body.removeChild(document.getElementById("Button3"));
+            document.body.removeChild(document.getElementById("Button4"));
+        }
 		$("#qNum").text('問題' + d.qNum); // 問題番号を表示
 		$("#qSentence").text(data[0][0]); // 問題文を表示
-		for (let j=1; j<=4; ++j){
-			$("#q" + j).text(data[0][j]); // 選択肢を表示
+        if (data[0][3] !== ''){ // 選択肢が3つ以上あれば要素を追加
+            for (let i=3; i<5; ++i){ 
+                let elementInput = document.createElement("input");
+                if (i == 4){
+                    elementInputFour = elementInput;
+                } else if (i == 3) {
+                    elementInputThree = elementInput;
+                }
+                elementInput.setAttribute("id", "Button" + i);
+                elementInput.setAttribute("type", "Button");
+                elementInput.setAttribute("value", i);
+                $("body")[0].insertBefore(elementInput, document.getElementById("CorrectOrMiss"));
+            }
+        }      
+        for (let i=1; i<=4; ++i){
+		    $("#q" + i).text(data[0][i]); // 選択肢を表示
         }
-		d.resolveA(); // Promiseのインスタンス値をfulfilledにする
+
+		d.resolveA(); // 問題文と選択肢を表示が終了したらPromiseオブジェクトの値をfulfilledにする
 	}
 	
     /////////////////////////////////////////// 正解･不正解を表示 ///////////////////////////////////////////
     
-	function dispCorrectOrMiss(OrMiss){
+	let dispCorrectOrMiss = function (OrMiss){
 		if (OrMiss == 1){
 			$("#CorrectOrMiss").text('正解');
 		} else {
@@ -102,7 +140,7 @@
 	
     /////////////////////////////////////////// gs関数の呼び出しに失敗したら ///////////////////////////////////////////
     
-	function failedAccess(err, obj){
+	let failedAccess = function (err, obj){
 		$("#Button4").after('<p>missed to call ' + obj.calledFunctionInGS + ' error : ' + err + '</p>'); // ページに表示
 	}
 	

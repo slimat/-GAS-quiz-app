@@ -16,6 +16,7 @@ function QAInfo(count) { // evaluate後に呼び出されるので, doGet関数�
     Logger.log('QAInfo関数呼び出し完了');
     var data = sheet.getRange(count+1, 1, 1, 6).getValues(); // セルの値を取得し, テンプレートに付与
     Logger.log('gsファイルでの' + count + '番目の問題文 = ' + data[0][0]);
+    Logger.log('data[0][3] = ' + data[0][3]);
     
     return data;
 }
