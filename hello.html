@@ -13,20 +13,11 @@
 		<li id='q3'></li>
 		<li id='q4'></li>
 	</ol>
-	
-	<!--
-    <input type="button" id="Button1" onclick="checkTheAnswer(1)">
-	<input type="button" id="Button2" onclick="checkTheAnswer(2)">
-	<input type="button" id="Button3" onclick="checkTheAnswer(3)">
-	<input type="button" id="Button4" onclick="checkTheAnswer(4)">
-	-->
-    
+
 	<p id='CorrectOrMiss'>ここに正解･不正解が表示されます</p> <!-- 正解･不正解を表示 -->
 	<input type="button" id="next" value="次に進む">
 	
 	<script>
-    let elementInputObj = new Object();
-    let elementInputName = ['oneElementInput', 'twoElementInput', 'threeElementInput', 'fourElementInput'];
     let elementInputOne, elementInputTwo, elementInputThree, elementInputFour;
     
     for (let i=1; i<3; ++i){
@@ -78,8 +69,10 @@
     
 	let checkTheAnswer = async function (clickedNum){
 		for (let i = 1; i <= 4; ++i){  // 回答ボタンの無効化
-			$("#Button" + i).css("opacity", 0.3); // 回答ボタンの透明度を高める
-			$("#Button" + i)[0].setAttribute("onclick", ""); // 回答ボタンの無効化
+            if ((document.getElementById("Button3") !== null) || i < 3){
+			    $("#Button" + i).css("opacity", 0.3); // 回答ボタンの透明度を高める
+			    $("#Button" + i)[0].setAttribute("onclick", ""); // 回答ボタンの無効化
+            }
 		}
 		await google.script.run.withSuccessHandler(dispCorrectOrMiss).withFailureHandler(failedAccess).withUserObject({qNum: countObj.count, calledFunctionInGS: 'answerButtonClick'}).answerButtonClick(clickedNum, countObj.count);
         try {  // nextボタンを有効化
