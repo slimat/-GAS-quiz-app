@@ -32,14 +32,7 @@
     }
     
     for (let i=1; i<3; ++i){
-        let elementLi = document.createElement("li");
-        let elementInput = document.createElement("input");
-        elementInput.setAttribute("id", "Button" + i);
-        elementInput.setAttribute("type", "Button");
-        elementInput.setAttribute("value", i);
-        elementLi.setAttribute("id", "q" + i);
-        $("#qOL")[0].appendChild(elementLi);
-        $("body")[0].insertBefore(elementInput, document.getElementById("CorrectOrMiss"));
+        addChoiceAndAnsBtn(i);
     }
     
 	let countObj = {
@@ -112,14 +105,7 @@
 		$("#qSentence").text(data[0][0]); // 問題文を表示
         if (data[0][3] !== ''){ // 選択肢が3つ以上あれば要素を追加
             for (let i=3; i<5; ++i){ 
-                let elementLi = document.createElement("li");
-                let elementInput = document.createElement("input");
-                elementInput.setAttribute("id", "Button" + i);
-                elementInput.setAttribute("type", "Button");
-                elementInput.setAttribute("value", i);
-                elementLi.setAttribute("id", "q" + i);
-                $("#qOL")[0].appendChild(elementLi);
-                $("body")[0].insertBefore(elementInput, document.getElementById("CorrectOrMiss"));
+                addChoiceAndAnsBtn(i);
             }
         }      
         for (let i=1; i<=4; ++i){
