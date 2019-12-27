@@ -7,18 +7,29 @@
 <body>
 	<p id="qNum">おはよう</p>
 	<p id='qSentence'>こんにちは</p> <!-- 問題文を取得 -->
-	<ol id="qOL">
-		<li id='q1'></li> <!-- 選択肢1を表示 -->
+	<ol id="qOL"><!-- 
+		<li id='q1'></li> --><!-- 選択肢1を表示 --><!--
 		<li id='q2'></li>
 		<li id='q3'></li>
-		<li id='q4'></li>
-	</ol>
+		<li id='q4'></li>-->
+	</ol> 
 
 	<p id='CorrectOrMiss'>ここに正解･不正解が表示されます</p> <!-- 正解･不正解を表示 -->
 	<input type="button" id="next" value="次に進む">
 	
 	<script>
     let elementInputOne, elementInputTwo, elementInputThree, elementInputFour;
+    
+    for (let i=1; i<3; ++i){
+        let elementLi = document.createElement("li");
+        if (i == 2){
+            elementLiTwo = elementLi;
+        } else if (i == 1) {
+            elementLiOne = elementLi;
+        }
+        elementLi.setAttribute("id", "q" + i);
+        $("#qOL")[0].appendChild(elementLi);
+    }
     
     for (let i=1; i<3; ++i){
         let elementInput = document.createElement("input");
@@ -96,10 +107,22 @@
         if (document.getElementById("Button3") !== null){
             document.body.removeChild(document.getElementById("Button3"));
             document.body.removeChild(document.getElementById("Button4"));
+            $("#qOL")[0].removeChild(document.getElementById("q3"));
+            $("#qOL")[0].removeChild(document.getElementById("q4"));
         }
 		$("#qNum").text('問題' + d.qNum); // 問題番号を表示
 		$("#qSentence").text(data[0][0]); // 問題文を表示
         if (data[0][3] !== ''){ // 選択肢が3つ以上あれば要素を追加
+            for (let i=3; i<5; ++i){
+                let elementLi = document.createElement("li");
+                if (i == 3){
+                    elementLiThree = elementLi;
+                } else if (i == 4) {
+                    elementLiFour = elementLi;
+                }
+                elementLi.setAttribute("id", "q" + i);
+                $("#qOL")[0].appendChild(elementLi);
+            }
             for (let i=3; i<5; ++i){ 
                 let elementInput = document.createElement("input");
                 if (i == 4){
