@@ -25,11 +25,16 @@ function answerButtonClick(click_value, numQ) {
     scriptProperties.setProperty('closer', "a".replace("a", function (){return String(Number(scriptProperties.getProperty('closer')) + 1);}));
     Logger.log('answerButtonClickの呼び出し完了, click_value = ' + click_value);
     Logger.log("F" + scriptProperties.getProperty('closer') + "であればOK : F" + (numQ + 1));
-    if(sheet.getRange("F" + (numQ + 1)).getValues() == Number(click_value)){
+    var correctNum = sheet.getRange("F" + (numQ + 1)).getValues();
+    var AtoE = ["B", "C", "D", "E"];
+    var correctAns = sheet.getRange(numQ+1, Number(correctNum)+1).getValue();
+    Logger.log("correctNum : " + correctNum + " , correctAns : " + correctAns + " , typeof correctNum : " + typeof correctNum + " , typeof correctNum+1 : " + typeof (correctNum+1) + " , typeof numQ+1 : " + typeof (numQ+1));
+    Logger.log("correctNum+1 : " + correctNum+1);
+    if(correctNum == Number(click_value)){
         Logger.log('正解');
-        return 1;
+        return [1, correctAns];
     } else {
         Logger.log('不正解');
-        return 0;
+        return [0, correctAns];
     }
-} // function
+}
