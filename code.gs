@@ -5,8 +5,10 @@ function doGet() {
     scriptProperties.setProperty('closer', '1');
     Logger.log('doGet関数呼び出し完了');
     try {
+        Logger.log('テンプレート作成完了');
         var template = HtmlService.createTemplateFromFile("hello").evaluate(); // テンプレートオブジェクトの取得
     } catch(e) {
+        Logger.log('エラー発生(HtmlService利用時)');
         Logger.log(e.message);
     }
     return template;
