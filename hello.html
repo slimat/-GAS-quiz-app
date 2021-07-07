@@ -11,23 +11,22 @@
 	<p id='CorrectOrMiss'>ここに正解･不正解が表示されます</p> <!-- 正解･不正解を表示 -->
 	<input type="button" id="nextQuestion" value="次に進む">
 	<script>
-    
     let ansP = document.createElement("p");
     $("body")[0].insertBefore(ansP, document.getElementById("nextQuestion"));
     
     function addChoiceAndAnsBtn(i){
-        let elementLi = document.createElement("li");
-        let elementInput = document.createElement("input");
-        elementInput.setAttribute("id", "Button" + i);
-        elementInput.setAttribute("type", "Button");
-        elementInput.setAttribute("value", i);
-        elementLi.setAttribute("id", "q" + i);
-        //意味不明
-        $("#qOL")[0].appendChild(elementLi);
-        $("body")[0].insertBefore(elementInput, document.getElementById("CorrectOrMiss"));
+      let elementList = document.createElement("li"); //何に使う?
+      let elementInput = document.createElement("input");
+      elementInput.setAttribute("id", "Button" + i);
+      elementInput.setAttribute("type", "Button");
+      elementInput.setAttribute("value", i);
+      elementList.setAttribute("id", "q" + i);
+      //意味不明
+      $("#qOL")[0].appendChild(elementList);
+      $("body")[0].insertBefore(elementInput, document.getElementById("CorrectOrMiss"));
     }
     
-    for (let i=1; i<3; ++i){
+    for (let i=1; i<=2; ++i){
         addChoiceAndAnsBtn(i);
     }
     
@@ -36,22 +35,24 @@
 		countPlus: function() {++this.count;},
 	};
     
-    /////////////////////////////////////////// 次の問題文と選択肢の取得及び表示 と 回答ボタンの表示及び有効化 ///////////////////////////////////////////
+  ///////////////////////// 次の問題文と選択肢の取得及び表示 と 回答ボタンの表示及び有効化 /////////////////////////
     
+  //即時関数にしたい  
 	let nextQuestionFunction = async function (){
-        countObj.countPlus(); // 問題番号をインクリメント
-        ansP.textContent = '';
-		$("#CorrectOrMiss").text('');// 前回の正解･不正解を非表示にする
-        if (countObj.count !== 1){ // 一度次に進むボタンが有効化されていたら無効にする
-            $("#nextQuestion")[0].removeEventListener("click",nextQuestion); // 次に進むボタンの無効化
-        }
-        $("#nextQuestion").css("opacity", 0.3); // 次に進むボタンの透明度を上げる
+    countObj.countPlus(); // 問題番号をインクリメント
+    ansP.textContent = '';
+    $("#CorrectOrMiss").text('');// 前回の正解･不正解を非表示にする
+    if (countObj.count !== 1){ // 一度次に進むボタンが有効化されていたら無効にする
+      $("#nextQuestion")[0].removeEventListener("click",nextQuestion); // 次に進むボタンの無効化
+    }
+    $("#nextQuestion").css("opacity", 0.3); // 次に進むボタンの透明度を上げる
 		try { // 問題文･選択肢の取得及び表示処理時に
 			await callQAInfo(); // 問題文及び選択肢の取得及び表示が終了するまで実行が停止
 		} catch (e) {
 			$("#Button4").after('<p>error → hello.html → 問題文など取得時 → ' + e.message + '</p>'); // エラー時に画面出力
 		}
-		
+
+    //回答ボタンの表示と有効化
 		for (let i = 1; i <= 4; ++i){
 			$("#Button" + i).css("opacity", 1); // 回答ボタンを表示
 			try { // 回答ボタンの有効化時に発生しうるエラーに対するハンドラの追加
@@ -62,66 +63,65 @@
 		}
 	}
     
-	/////////////////////////////////////////// 回答ボタンがクリックされたときに, 正解・不正解を表示 ///////////////////////////////////////////
+	/////////////////////// 回答ボタンがクリックされたときに, 正解・不正解を表示 ///////////////////////
     
 	let checkTheAnswer = async function (clickedNum){
 		for (let i = 1; i <= 4; ++i){  // 回答ボタンを無効化
-            if ((document.getElementById("Button3") !== null) || i < 3){
-			    $("#Button" + i).css("opacity", 0.3); // 回答ボタンの透明度を高める
-			    $("#Button" + i)[0].setAttribute("onclick", ""); // 回答ボタンを無効化
-            }
+      if ((document.getElementById("Button3") !== null) || i < 3){
+        $("#Button" + i).css("opacity", 0.3); // 回答ボタンの透明度を高める
+        $("#Button" + i)[0].setAttribute("onclick", ""); // 回答ボタンを無効化
+      }
 		}
 		await google.script.run.withSuccessHandler(dispCorrectOrMiss).withFailureHandler(failedAccess).withUserObject({qNum: countObj.count, calledFunctionInGS: 'answerButtonClick'}).answerButtonClick(clickedNum, countObj.count);
-        try {  // 次に進むボタンを有効化
-            $("#nextQuestion")[0].addEventListener("click", nextQuestionFunction, {once: true});
-        } catch(e) {
-            $("#Button4").after("<p>error → hello.html → イベントハンドラの追加時 → " + e.message + "</p>"); // エラー内容を画面出力
-        }        
+    try {  // 次に進むボタンを有効化
+      $("#nextQuestion")[0].addEventListener("click", nextQuestionFunction, {once: true});
+    } catch(e) {
+      $("#Button4").after("<p>error → hello.html → イベントハンドラの追加時 → " + e.message + "</p>"); // エラー内容を画面出力
+    }        
 	}
 	
-    /////////////////////////////////////////// 次の問題文･選択肢の取得及び表示 ///////////////////////////////////////////
+    /////////////////////// 次の問題文･選択肢の取得及び表示 ///////////////////////
     
 	let callQAInfo = function (){
 		return new Promise((resolve, reject) => { // Promiseのインスタンスを返す
-			google.script.run.withSuccessHandler(setQuestion).withFailureHandler(failedAccess).withUserObject({qNum: countObj.count, calledFunctionInGS: "QAInfo", resolveA: resolve, rejectA: reject}).QAInfo(countObj.count); // countObj.count番目の問題を出題
-		});
-	}    
+			google.script.run.withSuccessHandler(setQuestion).withFailureHandler(failedAccess).withUserObject({qNum:countObj.count, calledFunctionInGS: "QAInfo", resolveA: resolve, rejectA: reject}).QAInfo(countObj.count); // countObj.count番目の問題を出題
+		}); //Promise
+	} //callQAInfo    
     
     /////////////////////////////////////////// 問題文と選択肢を表示 ///////////////////////////////////////////
     
 	let setQuestion = function (data, d){
-        if (document.getElementById("Button3") !== null){
-            for (let i=3; i<5; ++i){
-                document.body.removeChild(document.getElementById("Button" + i));
-                $("#qOL")[0].removeChild(document.getElementById("q" + i));
-            }
-        }
+    if (document.getElementById("Button3") !== null){
+      for (let i=3; i<5; ++i){
+        document.body.removeChild(document.getElementById("Button" + i));
+        $("#qOL")[0].removeChild(document.getElementById("q" + i));
+      }
+    }
 		$("#qNum").text('問題' + d.qNum); // 問題番号を表示
 		$("#qSentence").text(data[0][0]); // 問題文を表示
-        if (data[0][3] !== ''){ // 選択肢が3つ以上あれば要素を追加
-            for (let i=3; i<5; ++i){ 
-                addChoiceAndAnsBtn(i);
-            }
-        }      
-        for (let i=1; i<=4; ++i){
-		    $("#q" + i).text(data[0][i]); // 選択肢を表示
-        }
+    if (data[0][3] !== ''){ // 選択肢が3つ以上あれば要素を追加
+      for (let i=3; i<=4; ++i){ 
+          addChoiceAndAnsBtn(i);
+      }
+    }      
+    for (let i=1; i<=4; ++i){
+    $("#q" + i).text(data[0][i]); // 選択肢を表示
+    }
 
 		d.resolveA(); // 問題文と選択肢を表示が終了したらPromiseオブジェクトの値をfulfilledにする
 	}
 	
     /////////////////////////////////////////// 正解･不正解を表示 ///////////////////////////////////////////
     
-	let dispCorrectOrMiss = function (OrMiss){
-		if (OrMiss[0] == 1){
+	let dispCorrectOrMiss = function (correctNumAndAnswer){
+		if (correctNumAndAnswer[0] == 1){
 			$("#CorrectOrMiss").text('正解');
 		} else {
 			$("#CorrectOrMiss").text('不正解');
-//            ansP.textContent = `正解は ${OrMiss[1]}`;
-            ansP.textContent = "正解は " + OrMiss[1];
+//            ansP.textContent = `正解は ${correctNumAndAnswer[1]}`;
+      ansP.textContent = "正解は " + correctNumAndAnswer[1];
 		}
 		$("#nextQuestion").css("opacity", 1); // 次に進むボタンを表示
-        
 	}
 	
     /////////////////////////////////////////// gs関数の呼び出しに失敗したら ///////////////////////////////////////////
