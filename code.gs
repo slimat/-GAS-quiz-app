@@ -18,7 +18,7 @@ function getQuestionAndChoices(count) { // evaluate後に呼び出されるの�
     Logger.log('getQuestionAndChoices関数呼び出し完了');
     Logger.log('countの値 : ' + count);
     //count+1→countにするべきでは?
-    var data = sheet.getRange(count+1, 1, 1, 6).getValues(); // セルの値を取得し, テンプレートに付与
+    var data = sheet.getRange(count+1, 1, 1, 5).getValues(); // セルの値を取得し, テンプレートに付与
     Logger.log('gsファイルでの' + count + '番目の問題文 = ' + data[0][0]);
     Logger.log('data[0][3] = ' + data[0][3]);
     
