@@ -47,7 +47,7 @@
     }
     $("#nextQuestion").css("opacity", 0.3); // 次に進むボタンの透明度を上げる
 		try { // 問題文･選択肢の取得及び表示処理時に
-			await callQAInfo(); // 問題文及び選択肢の取得及び表示が終了するまで実行が停止
+			await callgetQuestionAndChoices(); // 問題文及び選択肢の取得及び表示が終了するまで実行が停止
 		} catch (e) {
 			$("#Button4").after('<p>error → hello.html → 問題文など取得時 → ' + e.message + '</p>'); // エラー時に画面出力
 		}
@@ -82,11 +82,11 @@
 	
     /////////////////////// 次の問題文･選択肢の取得及び表示 ///////////////////////
     
-	let callQAInfo = function (){
+	let callgetQuestionAndChoices = function (){
 		return new Promise((resolve, reject) => { // Promiseのインスタンスを返す
-			google.script.run.withSuccessHandler(setQuestion).withFailureHandler(failedAccess).withUserObject({qNum:countObj.count, calledFunctionInGS: "QAInfo", resolveA: resolve, rejectA: reject}).QAInfo(countObj.count); // countObj.count番目の問題を出題
+			google.script.run.withSuccessHandler(setQuestion).withFailureHandler(failedAccess).withUserObject({qNum:countObj.count, calledFunctionInGS: "getQuestionAndChoices", resolveA: resolve, rejectA: reject}).getQuestionAndChoices(countObj.count); // countObj.count番目の問題を出題
 		}); //Promise
-	} //callQAInfo    
+	} //callgetQuestionAndChoices    
     
     /////////////////////////////////////////// 問題文と選択肢を表示 ///////////////////////////////////////////
     

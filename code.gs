@@ -14,8 +14,8 @@ function doGet() {
     return template;
 }
 
-function QAInfo(count) { // evaluate後に呼び出されるので, doGet関数の定義の後でOK
-    Logger.log('QAInfo関数呼び出し完了');
+function getQuestionAndChoices(count) { // evaluate後に呼び出されるので, doGet関数の定義の後でOK
+    Logger.log('getQuestionAndChoices関数呼び出し完了');
     Logger.log('countの値 : ' + count);
     //count+1→countにするべきでは?
     var data = sheet.getRange(count+1, 1, 1, 6).getValues(); // セルの値を取得し, テンプレートに付与
