@@ -22,12 +22,12 @@
   let nextQuestionFunction = async function (){
     countObj.countPlus(); // 問題番号をインクリメント
     try {
-      $(".lds-dual-ring")[0].style.display = "block";
+      $(".loader")[0].style.display = "block";
       await callgetQuestionAndChoices(); // 問題文及び選択肢の取得及び表示が終了するまで実行が停止
     } catch (e) {
       $("#Button4").after('<p>error → hello.html → 問題文など取得時 → ' + e.message + '</p>'); // エラー時に画面出力
     } finally {
-      $(".lds-dual-ring")[0].style.display = "none";
+      $(".loader")[0].style.display = "none";
     }
 
     //回答ボタンの表示と有効化
@@ -78,13 +78,13 @@
       $("#Button" + i)[0].setAttribute("onclick", ""); // 回答ボタンを無効化
     }
     try {
-      $(".lds-dual-ring")[0].style.display = "block";
+      $(".loader")[0].style.display = "block";
       await google.script.run.withSuccessHandler(dispCorrectOrMiss).withFailureHandler(failedAccess).withUserObject({qNum: countObj.count, calledFunctionInGS: 'answerButtonClick'}).answerButtonClick(clickedNum, countObj.count);
     } catch(e) {
       // エラー内容を画面出力
       $("#Button4").after("<p>error → hello.html → イベントハンドラの追加時 → " + e.message + "</p>");
     } finally {
-      $(".lds-dual-ring")[0].style.display = "none";
+      $(".loader")[0].style.display = "none";
       // 正解･不正解を表示してから次に進むボタンを有効化
       $("#nextQuestionButton")[0].setAttribute("onclick", "removeNode(); nextQuestionFunction()");
     }

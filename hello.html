@@ -6,13 +6,13 @@
   <?!= include('Stylesheet'); ?>
 </head>
 <body>
-  <div class="lds-dual-ring" style="display: none"></div>
 	<p id="qNum">ここに問題番号が表示されます</p>
 	<p id='qSentence'>ここに問題文が表示されます</p> <!-- 問題文を取得 -->
 	<ol id="OrderedListForChoiceList"></ol> <!-- 選択肢親ノード -->
 	<p id='CorrectOrMiss'></p> <!-- 正解･不正解を表示 -->
   <p id='ansSentence'></p>
 	<input type="button" id="nextQuestionButton" value="次に進む">
+  <div class="loader" style="display: none"></div>
 
   <?!= include('JavaScript'); ?>
 </body>
