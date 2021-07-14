@@ -1,142 +1,19 @@
 <!DOCTYPE html>
 <html>
-
 <head>
 	<base target="_top">
 	<script src="https://code.jquery.com/jquery-3.1.1.js"></script>
+  <?!= include('Stylesheet'); ?>
 </head>
-
 <body>
+  <div class="lds-dual-ring" style="display: none"></div>
 	<p id="qNum">ここに問題番号が表示されます</p>
 	<p id='qSentence'>ここに問題文が表示されます</p> <!-- 問題文を取得 -->
 	<ol id="OrderedListForChoiceList"></ol> <!-- 選択肢親ノード -->
-	<p id='CorrectOrMiss'>
-		<!-- ここに正解･不正解が表示されます -->
-	</p> <!-- 正解･不正解を表示 -->
+	<p id='CorrectOrMiss'></p> <!-- 正解･不正解を表示 -->
+  <p id='ansSentence'></p>
 	<input type="button" id="nextQuestionButton" value="次に進む">
-	<script>
-		let choicesNum_scriptTag;
-  let ansSentence = document.createElement("p"); //正解文
-  $("body")[0].insertBefore(ansSentence, document.getElementById("nextQuestionButton"));
-  
-  function addChoiceAndAnsBtn(i){
-    let elementList = document.createElement("li"); //選択肢ノード
-    let elementInput = document.createElement("input");
-    elementInput.setAttribute("id", "Button" + i);
-    elementInput.setAttribute("type", "Button");
-    elementInput.setAttribute("value", i);
-    elementList.setAttribute("id", "q" + i); //<li id="q1~q4"...
-    $("#OrderedListForChoiceList")[0].appendChild(elementList); //選択肢の模様
-    $("body")[0].insertBefore(elementInput, document.getElementById("CorrectOrMiss"));
-  }
-  
-  let countObj = {
-    count: 0,
-    countPlus: function() {++this.count;},
-  };
-    
-  ///////////////////////// 次の問題文と選択肢の取得及び表示 と 回答ボタンの表示及び有効化 /////////////////////////
-    
-  let nextQuestionFunction = async function (){
-    countObj.countPlus(); // 問題番号をインクリメント
-    $("#nextQuestionButton").css("opacity", 0.3); // 次に進むボタンの透明度を上げる
-    try {
-      await callgetQuestionAndChoices(); // 問題文及び選択肢の取得及び表示が終了するまで実行が停止
-    } catch (e) {
-      $("#Button4").after('<p>error → hello.html → 問題文など取得時 → ' + e.message + '</p>'); // エラー時に画面出力
-    }
 
-    //回答ボタンの表示と有効化
-    for (let i = 1; i <= choicesNum_scriptTag; ++i){
-      $("#Button" + i).css("opacity", 1); // 回答ボタンを表示
-      try { // 回答ボタンの有効化時に発生しうるエラーに対するハンドラの追加
-        $("#Button" + i)[0].setAttribute("onclick","checkTheAnswer(" + i + ")"); // 回答ボタンの有効化
-      } catch(e) { // もしエラーが発生した場合は
-        $("#Button4").after('<p>error → hello.html → 回答ボタン有効化時 → ' + e.message + '</p>'); // エラー内容を画面出力
-      }
-    }
-  };
-
-  /////////////////////// 次の問題文･選択肢の取得及び表示 ///////////////////////
-  
-  let callgetQuestionAndChoices = function (){
-    return new Promise((resolve, reject) => { // Promiseのインスタンスを返す
-      google.script.run.withSuccessHandler(setQuestionAndChoices).withFailureHandler(failedAccess).withUserObject({qNum:countObj.count, calledFunctionInGS: "getQuestionAndChoices", resolveA: resolve, rejectA: reject}).getQuestionAndChoices(countObj.count); // countObj.count番目の問題を出題
-    }); //Promise
-  } //callgetQuestionAndChoices
-
-  ///////////////////////////////////////// 問題文と選択肢を表示 /////////////////////////////////////////
-  
-  let setQuestionAndChoices = function (questionAndChoicesAndChoicesNumObj, d){
-    choicesNum_scriptTag = questionAndChoicesAndChoicesNumObj[1];
-    // if (questionAndChoicesAndChoicesNumObj[0][0] == null){ //正答率の表示
-
-    // }
-    $("#qNum").text('問題' + d.qNum); // 問題番号を表示
-    console.log("選択肢の数 : " + questionAndChoicesAndChoicesNumObj[1]);
-    $("#qSentence").text(questionAndChoicesAndChoicesNumObj[0][0][0]); // 問題文を表示
-    for (let i=1; i<=questionAndChoicesAndChoicesNumObj[1]; i++){ 
-      addChoiceAndAnsBtn(i);
-    }
-    for (let i=1; i<=questionAndChoicesAndChoicesNumObj[1]; i++){
-      $("#q" + i).text(questionAndChoicesAndChoicesNumObj[0][0][i]); // 選択肢を表示
-      console.log("選択肢" + i + " : " + questionAndChoicesAndChoicesNumObj[0][0][i]);
-    }
-    d.resolveA(); // 問題文と選択肢を表示が終了したらPromiseオブジェクトの値をfulfilledにする
-  }
-  
-  /////////////////////// 回答ボタンがクリックされたときに, 正解・不正解を表示 ///////////////////////
-  
-  let checkTheAnswer = async function (clickedNum){
-    for (let i = 1; i <= choicesNum_scriptTag; ++i){  // 回答ボタンを無効化
-      $("#Button" + i).css("opacity", 0.3); // 回答ボタンの透明度を高める
-      $("#Button" + i)[0].setAttribute("onclick", ""); // 回答ボタンを無効化
-    }
-    await google.script.run.withSuccessHandler(dispCorrectOrMiss).withFailureHandler(failedAccess).withUserObject({qNum: countObj.count, calledFunctionInGS: 'answerButtonClick'}).answerButtonClick(clickedNum, countObj.count);
-    try {  // 正解･不正解を表示してから次に進むボタンを有効化
-      $("#nextQuestionButton")[0].setAttribute("onclick", "removeNode(); nextQuestionFunction()");
-      // $('#nextQuestionButton')[0].on('click', removeNode(); nextQuestionFunction());
-      // $("#nextQuestionButton")[0].addEventListener("click", removeNode, {once: true});
-    } catch(e) {
-      $("#Button4").after("<p>error → hello.html → イベントハンドラの追加時 → " + e.message + "</p>"); // エラー内容を画面出力
-    }
-  }
-
-  /////////////////////////////////////////// 正解･不正解を表示 ///////////////////////////////////////////
-  
-  let dispCorrectOrMiss = function (correctNumAndAnswer){
-    if (correctNumAndAnswer[0] == 1){
-      $("#CorrectOrMiss").text('正解');
-    } else {
-      $("#CorrectOrMiss").text('不正解');
-      ansSentence.textContent = "正解は " + correctNumAndAnswer[1];
-    }
-    $("#nextQuestionButton").css("opacity", 1); // 次に進むボタンを表示
-  }
-
-  /////////////////////////////////////////// ノードを削除 ///////////////////////////////////////////
-
-  //2問目からの実行が全てこの関数内で行っているようになってしまう
-  function removeNode(){
-    console.log(countObj.count + "問目の選択肢の数 : " + choicesNum_scriptTag);
-    for (let i=1; i<=choicesNum_scriptTag; i++){
-      document.body.removeChild(document.getElementById("Button" + i)); //回答ボタンノードを削除
-      $("#q" + i)[0].remove(); //選択肢となるノードを削除
-    }
-    ansSentence.textContent = '';
-    $("#CorrectOrMiss").text('');// 前回の正解･不正解を非表示にする
-    $("#nextQuestionButton").removeAttr("onclick"); // 次に進むボタンの無効化
-    $("#qSentence").text('');
-    $("#nextQuestionButton").css("opacity", 0);
-  }
-
-  /////////////////////////////////////////// gs関数の呼び出しに失敗したら ///////////////////////////////////////////
-  
-  let failedAccess = function (err, obj){
-    $("#Button4").after('<p>missed to call ' + obj.calledFunctionInGS + ' error : ' + err + '</p>'); // ページに表示
-  }
-
-  nextQuestionFunction();
-	</script>
+  <?!= include('JavaScript'); ?>
 </body>
 </html>

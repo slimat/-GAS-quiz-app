@@ -1,20 +1,3 @@
-// "sheetFor_question_Choice_Answer"を取得
-var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("sheetFor_question_Choice_Answer"); 
-var scriptProperties = PropertiesService.getScriptProperties();
-
-function doGet() {
-  scriptProperties.setProperty('closer', '1');
-  Logger.log('doGet関数呼び出し完了');
-  try {
-    Logger.log('テンプレート作成完了');
-    var template = HtmlService.createTemplateFromFile("hello").evaluate(); // テンプレートオブジェクトの取得
-  } catch(e) {
-    Logger.log('エラー発生(HtmlService利用時)');
-    Logger.log(e.message);
-  }
-  return template;
-}
-
 function getQuestionAndChoices(count) { // evaluate後に呼び出されるので, doGet関数の定義の後でOK
   Logger.log('getQuestionAndChoices関数呼び出し完了');
   Logger.log('countの値 : ' + count);
@@ -41,4 +24,26 @@ function answerButtonClick(click_value, numQ) {
     Logger.log('不正解');
     return [0, correctAns];
   }
+}
+
+// "sheetFor_question_Choice_Answer"を取得
+var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("sheetFor_question_Choice_Answer"); 
+var scriptProperties = PropertiesService.getScriptProperties();
+
+function doGet() {
+  scriptProperties.setProperty('closer', '1');
+  Logger.log('doGet関数呼び出し完了');
+  try {
+    Logger.log('テンプレート作成完了');
+    var template = HtmlService.createTemplateFromFile("hello").evaluate(); // テンプレートオブジェクトの取得
+  } catch(e) {
+    Logger.log('エラー発生(HtmlService利用時)');
+    Logger.log(e.message);
+  }
+  return template;
+}
+
+function include(filename) {
+  return HtmlService.createHtmlOutputFromFile(filename)
+      .getContent();
 }
